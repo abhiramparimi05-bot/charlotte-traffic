@@ -68,3 +68,32 @@ To keep a Mac from sleeping during long collection: `caffeinate -i python collec
 ## License
 
 MIT License
+
+
+## Machine Learning Model
+
+The project includes `Charlotte_Traffic_Prediction.ipynb`.
+
+The model uses a Random Forest classifier to predict two categories:
+- 0 = No/low traffic
+- 1 = Traffic (medium/high combined)
+
+The model uses an 80% training and 20% testing split.
+
+## Running the Example
+
+Run the example script from the project directory:
+
+```bash
+python bin/run_demo.py
+```
+
+## Documentation
+
+Detailed explanations of the project's major functions are available in [Code Documentation](docs/documentation.md).
+
+## License
+
+This project uses the MIT License.
+
+[View MIT License](LICENSE)
