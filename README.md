@@ -1,5 +1,7 @@
+
 # Charlotte Traffic Congestion Prediction
 
+**Course:** DTSC 3602  
 **Group:** Group 16
 
 **Team Members:**
@@ -56,19 +58,19 @@ The project uses:
 
 **Step 1 — Clone the repository**
 
-```bash id="76fhcf"
+```bash
 git clone https://github.com/abhiramparimi05-bot/charlotte-traffic.git
 ```
 
 **Step 2 — Open the project directory**
 
-```bash id="k90d9a"
+```bash
 cd charlotte-traffic
 ```
 
 **Step 3 — Create a virtual environment**
 
-```bash id="p9at6h"
+```bash
 python3 -m venv venv
 ```
 
@@ -76,27 +78,23 @@ python3 -m venv venv
 
 Mac/Linux:
 
-```bash id="7h3ljg"
+```bash
 source venv/bin/activate
 ```
 
 Windows:
 
-```bash id="n7uwb5"
+```bash
 venv\Scripts\activate
 ```
 
 **Step 5 — Install dependencies**
 
-```bash id="m4v7qb"
+```bash
 pip install -r requirements.txt
 ```
 
-If the notebook libraries are not already included in `requirements.txt`, install them separately:
-
-```bash id="m2s1vy"
-pip install pandas scikit-learn matplotlib notebook
-```
+The updated `requirements.txt` includes the dependencies for data collection, data preparation, and machine learning.
 
 ## 4. API Configuration
 
@@ -106,7 +104,7 @@ https://developer.tomtom.com/
 
 Create a `.env` file in the project directory:
 
-```env id="r7n1ze"
+```env
 TOMTOM_API_KEY=your_key_here
 ```
 
@@ -130,13 +128,13 @@ The collected information includes traffic speed, free-flow speed, travel time, 
 
 Collect one traffic snapshot:
 
-```bash id="f0h9kn"
+```bash
 python collect_traffic.py
 ```
 
 Collect repeatedly at 15-minute intervals:
 
-```bash id="x3kb2s"
+```bash
 python collect_traffic.py 15
 ```
 
@@ -244,7 +242,7 @@ You can train the machine-learning model using this dataset without collecting n
 
 Start Jupyter Notebook:
 
-```bash id="ud4uwf"
+```bash
 jupyter notebook
 ```
 
@@ -260,7 +258,7 @@ Run the notebook cells in order to preprocess the data, train the Random Forest 
 
 Run:
 
-```bash id="m4d4xw"
+```bash
 python3 bin/run_demo.py
 ```
 
@@ -270,7 +268,9 @@ The script loads the cleaned CSV file and displays sample records and congestion
 
 ### Example Model Training Code
 
-```python id="wm14f2"
+The following example illustrates the project's machine-learning workflow.
+
+```python
 import pandas as pd
 
 from sklearn.compose import ColumnTransformer
@@ -283,9 +283,13 @@ from sklearn.metrics import (
     classification_report
 )
 
+# Load the cleaned dataset
 df = pd.read_csv("cleaned_Charlotte_traffic.csv")
+
+# Convert timestamp to datetime
 df["timestamp"] = pd.to_datetime(df["timestamp"])
 
+# Select input features
 feature_cols = [
     "hour", "minute", "is_weekend", "is_rush_hour",
     "road", "road_type", "road_class_frc",
@@ -313,8 +317,12 @@ X = df[feature_cols].copy()
 for col in boolean_cols:
     X[col] = X[col].astype(int)
 
+# Binary classification target
+# 0 = low traffic
+# 1 = medium/high traffic
 y = (df["traffic_level"] != "low").astype(int)
 
+# Chronological train/test split
 df_sorted = df.sort_values("timestamp")
 split_index = int(len(df_sorted) * 0.80)
 
@@ -327,6 +335,7 @@ X_test = X.loc[test_indices]
 y_train = y.loc[train_indices]
 y_test = y.loc[test_indices]
 
+# Preprocessing
 preprocessor = ColumnTransformer(
     transformers=[
         (
@@ -342,6 +351,7 @@ preprocessor = ColumnTransformer(
     ]
 )
 
+# Random Forest classifier
 model = Pipeline(
     steps=[
         ("preprocessor", preprocessor),
@@ -359,15 +369,19 @@ model = Pipeline(
     ]
 )
 
+# Train the model
 model.fit(X_train, y_train)
 
+# Evaluate predictions
 y_pred = model.predict(X_test)
 
 print("Accuracy:", accuracy_score(y_test, y_pred))
+
 print(
     "Balanced Accuracy:",
     balanced_accuracy_score(y_test, y_pred)
 )
+
 print(
     classification_report(
         y_test,
