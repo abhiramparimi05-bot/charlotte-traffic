@@ -1,4 +1,3 @@
-
 # Charlotte Traffic Congestion Prediction
 
 **Course:** DTSC 3602  
@@ -132,19 +131,32 @@ Collect one traffic snapshot:
 python collect_traffic.py
 ```
 
-Collect repeatedly at 15-minute intervals:
+Collect repeatedly at 30-minute intervals:
 
 ```bash
-python collect_traffic.py 15
+python collect_traffic.py 30
 ```
 
+On a Mac, `caffeinate -dis python collect_traffic.py 30` keeps the computer awake during long collection runs.
+
 **Output:** `charlotte_traffic.csv`
+
+### Collected Dataset
+
+`charlotte_traffic.csv` contains **4,600 rows** (25 locations per snapshot):
+
+| Period | Interval | Rows |
+|---|---|---|
+| Sept 26, 2026 (initial test) | 15 minutes | 100 |
+| Nov 12–17, 2026 | 30 minutes | 4,500 |
+
+The November collection covers weekday rush hours, nights, and weekends. Three snapshots on Nov 13 (8:00 AM, 8:50 PM, and 9:45 PM) overlap with nearby runs and should be removed during data preparation, leaving 4,525 rows.
 
 ### Major Functions
 
 - **`traffic_level(ratio)`** — Assigns a low, medium, or high congestion label.
 - **`get_weather()`** — Retrieves weather information from Open-Meteo.
-- **`collect()`** — Combines traffic, weather, location, and time information and saves observations to the CSV file.
+- **`collect()`** — Combines traffic, weather, location, and time information and saves observations to the CSV file. If a run fails (for example, a network error), the script prints the error and tries again at the next interval instead of stopping.
 
 ## 6. Traffic Congestion Classification
 
@@ -471,7 +483,7 @@ This project is licensed under the MIT License.
 
 Potential improvements include:
 
-- Collecting more weekday and rush-hour traffic observations.
+- Collecting data over several weeks to capture more rush hours and weather conditions.
 - Improving the balance between congestion categories.
 - Testing additional machine-learning algorithms.
 - Evaluating the model on larger datasets.
