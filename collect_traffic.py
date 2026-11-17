@@ -1,7 +1,14 @@
 # Charlotte traffic data collection
 # Gets live traffic speeds for 25 Charlotte locations from the TomTom Traffic Flow API,
-# caffeinate -i python collect_traffic.py 15: Used this command to run the script every 15 minutes automatically
-
+# adds weather and time info, labels traffic as low/medium/high, and saves it to a CSV.
+#
+# Run once:               python collect_traffic.py
+# Run every 30 minutes:   python collect_traffic.py 30
+#
+# How the data was collected:
+#   Sept 26, 2026:   first 100 rows, every 15 minutes (initial test)
+#   Nov 12-17, 2026: 4,500 more rows, every 30 minutes, using
+#                    caffeinate -dis python collect_traffic.py 30  (keeps the Mac awake)
 
 import os
 import sys
@@ -18,9 +25,10 @@ API_KEY = os.getenv("TOMTOM_API_KEY", "").strip()
 
 CSV_FILE = "charlotte_traffic.csv"
 
+# Lower zoom = only major roads, so interstate points match the highway and not a side street
 ZOOM = {"interstate": 6, "arterial": 9}
 
-#covered all four interstates through Charlotte plus eight major commuter roads, spread across downtown, the airport, University City, South Charlotte, and the east side.
+# Covered all four interstates through Charlotte plus eight major commuter roads, spread across downtown, the airport, University City, South Charlotte, and the east side.
 # name, road, road type, latitude, longitude
 LOCATIONS = [
     ("I-77 at Arrowood Rd", "I-77", "interstate", 35.1380, -80.9020),
@@ -75,7 +83,7 @@ def traffic_level(ratio):
 
 
 def get_weather():
-    # Gets the current Charlotte weather from Open-Meteo, a free weather API, since rain and weather affect traffic. If the weather call fails, the traffic data is still saved."
+    # Gets the current Charlotte weather from Open-Meteo, a free weather API, since rain and weather affect traffic. If the weather call fails, the traffic data is still saved.
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": 35.2271,
@@ -161,7 +169,7 @@ def collect():
         })
         time.sleep(0.25)  # small pause between API calls
 
-    # This saves the 25 new rows to the CSV file. 
+    # This saves the 25 new rows to the CSV file.
     new_file = not os.path.isfile(CSV_FILE)
     with open(CSV_FILE, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=HEADERS)
