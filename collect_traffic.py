@@ -1,9 +1,7 @@
 # Charlotte traffic data collection
 # Gets live traffic speeds for 25 Charlotte locations from the TomTom Traffic Flow API,
-# adds weather and time info, labels traffic as low/medium/high, and saves it to a CSV.
-#
-# Run once:              python collect_traffic.py
-# Run every 15 minutes:  python collect_traffic.py 15
+# caffeinate -i python collect_traffic.py 15: Used this command to run the script every 15 minutes automatically
+
 
 import os
 import sys
@@ -20,9 +18,9 @@ API_KEY = os.getenv("TOMTOM_API_KEY", "").strip()
 
 CSV_FILE = "charlotte_traffic.csv"
 
-# Lower zoom = only major roads, so interstate points match the highway and not a side street
 ZOOM = {"interstate": 6, "arterial": 9}
 
+#covered all four interstates through Charlotte plus eight major commuter roads, spread across downtown, the airport, University City, South Charlotte, and the east side.
 # name, road, road type, latitude, longitude
 LOCATIONS = [
     ("I-77 at Arrowood Rd", "I-77", "interstate", 35.1380, -80.9020),
@@ -65,7 +63,9 @@ HEADERS = [
 
 
 def traffic_level(ratio):
-    # ratio = current speed / free-flow speed (free-flow = speed with no traffic)
+    # ratio = current speed / free-flow speed (free-flow = car speed with no traffic)
+    # I used this ratio as every road has a different free-flow speed
+    # low = more than 80% of free-flow speed, medium = 50-80%, high = 50% or less
     if ratio > 0.8:
         return "low"
     elif ratio > 0.5:
@@ -75,7 +75,7 @@ def traffic_level(ratio):
 
 
 def get_weather():
-    # Open-Meteo is free and doesn't need a key. One call per run for all of Charlotte.
+    # Gets the current Charlotte weather from Open-Meteo, a free weather API, since rain and weather affect traffic. If the weather call fails, the traffic data is still saved."
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": 35.2271,
@@ -108,6 +108,7 @@ def collect():
     weekend = now.weekday() >= 5
     rush_hour = not weekend and now.hour in (7, 8, 16, 17)  # 7-9am and 4-6pm
 
+    # Calls the TomTom API for each location, Status 200 means success
     rows = []
     for name, road, road_type, lat, lon in LOCATIONS:
         url = f"https://api.tomtom.com/traffic/services/4/flowSegmentData/absolute/{ZOOM[road_type]}/json"
@@ -160,7 +161,7 @@ def collect():
         })
         time.sleep(0.25)  # small pause between API calls
 
-    # add header only if the file is new, then append the rows
+    # This saves the 25 new rows to the CSV file. 
     new_file = not os.path.isfile(CSV_FILE)
     with open(CSV_FILE, "a", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=HEADERS)
@@ -187,7 +188,11 @@ if __name__ == "__main__":
         minutes = float(sys.argv[1])
         while True:
             print(f"\n--- Run at {datetime.now():%Y-%m-%d %H:%M:%S} ---")
-            collect()
+            try:
+                collect()
+            except Exception as e:
+                # if the internet drops, skip this run instead of crashing
+                print(f"Run failed: {e} - will try again next run")
             print(f"Next run in {minutes:g} minutes (Ctrl+C to stop)")
             time.sleep(minutes * 60)
     else:
