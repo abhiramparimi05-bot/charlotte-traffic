@@ -35,8 +35,8 @@ The current machine-learning model uses two prediction classes:
 2. The script retrieves Charlotte weather information from Open-Meteo.
 3. Each observation receives a congestion label based on current speed compared with free-flow speed.
 4. The collected observations are saved to `charlotte_traffic.csv`.
-5. `data_preparation.ipynb` cleans and prepares the dataset.
-6. The cleaned dataset is saved as `cleaned_Charlotte_traffic.csv`.
+5. `data preparation.ipynb` cleans and prepares the dataset.
+6. The cleaned dataset is saved as `cleaned_charlotte_traffic.csv`.
 7. `Charlotte_Traffic_Prediction.ipynb` trains and evaluates the Random Forest classification model.
 8. `bin/run_demo.py` provides a simple example of loading and inspecting the cleaned dataset.
 
@@ -113,7 +113,7 @@ The Open-Meteo API does not require an API key.
 
 **Security:** Do not upload your `.env` file or private API key to GitHub.
 
-The existing cleaned sample dataset can be used for the machine-learning demonstration without a TomTom API key.
+The existing cleaned dataset can be used for the machine-learning demonstration without a TomTom API key.
 
 ## 5. Data Collection — Abhi Parimi
 
@@ -176,11 +176,11 @@ The machine-learning component combines medium and high congestion into one traf
 
 ## 7. Data Preparation — Omar Osman
 
-**Notebook:** `data_preparation.ipynb`
+**Notebook:** `data preparation.ipynb`
 
 **Input:** `charlotte_traffic.csv`
 
-**Output:** `cleaned_Charlotte_traffic.csv`
+**Output:** `cleaned_charlotte_traffic.csv`
 
 The data-preparation component uses pandas and matplotlib to clean, validate, transform, and analyze traffic observations.
 
@@ -188,7 +188,7 @@ The data-preparation component uses pandas and matplotlib to clean, validate, tr
 
 1. Load the original traffic dataset.
 2. Inspect column types, missing values, and duplicates.
-3. Remove duplicate observations and standardize column names and text fields.
+3. Remove duplicate observations (including three overlapping snapshots from Nov 13) and standardize column names and text fields.
 4. Convert timestamps and prepare time-related features.
 5. Explore and visualize traffic patterns.
 6. Export the cleaned dataset for machine learning.
@@ -244,9 +244,9 @@ Model performance is evaluated using:
 - Classification report
 - Confusion matrix
 
-## 9. Quick Training Demo on a Small Dataset
+## 9. Quick Training Demo
 
-The repository includes `cleaned_Charlotte_traffic.csv`, a sample dataset containing 100 observations.
+The repository includes `cleaned_charlotte_traffic.csv`, the cleaned dataset containing 4,525 observations from 25 Charlotte locations (Sept 26 and Nov 12–17, 2026).
 
 You can train the machine-learning model using this dataset without collecting new API data.
 
@@ -262,7 +262,7 @@ Open:
 
 `Charlotte_Traffic_Prediction.ipynb`
 
-Make sure `cleaned_Charlotte_traffic.csv` is available in the project directory.
+Make sure `cleaned_charlotte_traffic.csv` is available in the project directory.
 
 Run the notebook cells in order to preprocess the data, train the Random Forest classifier, and view the evaluation results.
 
@@ -296,7 +296,7 @@ from sklearn.metrics import (
 )
 
 # Load the cleaned dataset
-df = pd.read_csv("cleaned_Charlotte_traffic.csv")
+df = pd.read_csv("cleaned_charlotte_traffic.csv")
 
 # Convert timestamp to datetime
 df["timestamp"] = pd.to_datetime(df["timestamp"])
@@ -412,8 +412,8 @@ print(
 | `README.md` | Project overview and instructions |
 | `collect_traffic.py` | Traffic and weather data collection |
 | `charlotte_traffic.csv` | Original traffic dataset |
-| `data_preparation.ipynb` | Data cleaning and preparation |
-| `cleaned_Charlotte_traffic.csv` | Cleaned dataset |
+| `data preparation.ipynb` | Data cleaning and preparation |
+| `cleaned_charlotte_traffic.csv` | Cleaned dataset |
 | `Charlotte_Traffic_Prediction.ipynb` | Random Forest model training and evaluation |
 | `requirements.txt` | Python dependency information |
 | `.gitignore` | Files excluded from Git tracking |
@@ -436,14 +436,14 @@ The dataset includes:
 - Rain and wind conditions
 - Traffic congestion level
 
-### Sample Dataset Distribution
+### Dataset Distribution (cleaned data)
 
-| Congestion Level | Observations |
-|---|---:|
-| Low | 78 |
-| Medium | 14 |
-| High | 8 |
-| **Total** | **100** |
+| Congestion Level | Observations | Share |
+|---|---:|---:|
+| Low | 4,028 | 89.0% |
+| Medium | 327 | 7.2% |
+| High | 170 | 3.8% |
+| **Total** | **4,525** | **100%** |
 
 The dataset contains more low-congestion observations than medium- and high-congestion observations, creating class imbalance.
 
